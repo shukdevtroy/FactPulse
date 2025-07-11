@@ -4,7 +4,6 @@ from groq import Groq
 import json
 from datetime import datetime
 import time
-import re
 
 class RealTimeFactChecker:
     def __init__(self):
@@ -82,7 +81,7 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
             # Extract response
             response_content = chat_completion.choices[0].message.content
             
-            # Check for executed tools
+            # Check for executed tools - Fixed the error here
             executed_tools = getattr(chat_completion.choices[0].message, 'executed_tools', None)
             
             # Format tool execution info
@@ -94,29 +93,11 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
             return f"❌ Error querying model: {str(e)}", None, None
     
     def format_tool_info(self, executed_tools):
-        """Format executed tools information for display"""
+        """Format executed tools information for display - FIXED"""
         if not executed_tools:
-            return """
-            <div class="tool-info-card">
-                <div class="tool-info-header">
-                    <i class="icon">🧠</i>
-                    <h3>Knowledge Source</h3>
-                </div>
-                <div class="tool-info-content">
-                    <p>Response generated from existing knowledge base</p>
-                </div>
-            </div>
-            """
+            return "🔍 **Tools Used:** None (Used existing knowledge)"
         
-        tool_html = """
-        <div class="tool-info-card">
-            <div class="tool-info-header">
-                <i class="icon">🔍</i>
-                <h3>Tools Executed</h3>
-            </div>
-            <div class="tool-info-content">
-        """
-        
+        tool_info = "🔍 **Tools Used:**\n"
         for i, tool in enumerate(executed_tools, 1):
             try:
                 # Handle different tool object types
@@ -129,73 +110,21 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
                 else:
                     tool_name = str(tool)
                 
-                tool_html += f"""
-                <div class="tool-item">
-                    <div class="tool-name">{i}. {tool_name}</div>
-                """
+                tool_info += f"{i}. **{tool_name}**\n"
                 
                 # Add tool parameters if available
                 if hasattr(tool, 'parameters'):
                     params = tool.parameters
                     if isinstance(params, dict):
                         for key, value in params.items():
-                            tool_html += f'<div class="tool-param">{key}: {value}</div>'
+                            tool_info += f"   - {key}: {value}\n"
                 elif hasattr(tool, 'input'):
-                    tool_html += f'<div class="tool-param">Input: {tool.input}</div>'
-                    
-                tool_html += "</div>"
+                    tool_info += f"   - Input: {tool.input}\n"
                     
             except Exception as e:
-                tool_html += f'<div class="tool-item"><div class="tool-name">{i}. Tool {i}</div><div class="tool-param">Error parsing details</div></div>'
+                tool_info += f"{i}. **Tool {i}** (Error parsing details)\n"
         
-        tool_html += """
-            </div>
-        </div>
-        """
-        
-        return tool_html
-    
-    def format_response(self, response_content, query, response_time):
-        """Format the response with proper HTML structure"""
-        # Convert markdown-like formatting to HTML
-        formatted_content = response_content
-        
-        # Convert **bold** to <strong>
-        formatted_content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', formatted_content)
-        
-        # Convert *italic* to <em>
-        formatted_content = re.sub(r'\*(.*?)\*', r'<em>\1</em>', formatted_content)
-        
-        # Convert newlines to <br> for better formatting
-        formatted_content = formatted_content.replace('\n', '<br>')
-        
-        # Convert numbered lists
-        formatted_content = re.sub(r'^(\d+\.\s)', r'<br><strong>\1</strong>', formatted_content, flags=re.MULTILINE)
-        
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        html_response = f"""
-        <div class="response-card">
-            <div class="response-header">
-                <div class="query-section">
-                    <h3>📝 Query</h3>
-                    <p class="query-text">{query}</p>
-                </div>
-                <div class="meta-info">
-                    <span class="timestamp">🕐 {timestamp}</span>
-                    <span class="response-time">⚡ {response_time}s</span>
-                </div>
-            </div>
-            <div class="response-content">
-                <h3>💬 Response</h3>
-                <div class="response-text">
-                    {formatted_content}
-                </div>
-            </div>
-        </div>
-        """
-        
-        return html_response
+        return tool_info
     
     def get_example_queries(self):
         """Return categorized example queries"""
@@ -263,396 +192,171 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
 def create_interface():
     fact_checker = RealTimeFactChecker()
     
-    # Modern CSS design
+    # Custom CSS for beautiful styling
     custom_css = """
-    /* Reset and base styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f8fafc;
-        color: #334155;
-        line-height: 1.6;
-    }
-    
+    <style>
     .gradio-container {
-        max-width: 1200px !important;
+        max-width: 1400px !important;
         margin: 0 auto;
-        padding: 20px;
-        background: #f8fafc;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    /* Header */
-    .app-header {
-        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    .main-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
-        padding: 2rem;
-        border-radius: 16px;
-        margin-bottom: 2rem;
+        padding: 30px;
+        border-radius: 20px;
+        margin-bottom: 30px;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
     
-    .app-header h1 {
+    .main-header h1 {
         font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
     
-    .app-header p {
-        font-size: 1.1rem;
+    .main-header p {
+        font-size: 1.2rem;
+        margin: 10px 0 0 0;
         opacity: 0.9;
-        font-weight: 400;
     }
     
-    /* Cards */
-    .card {
+    .feature-card {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        border: 1px solid #e1e8ed;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
-    .card h3 {
-        color: #1e293b;
-        font-size: 1.25rem;
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    .example-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .example-category {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .example-category h4 {
+        margin: 0 0 10px 0;
+        color: #2d3748;
         font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
     }
     
-    /* Status indicators */
     .status-success {
-        background: #10b981;
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
         color: white;
-        padding: 0.75rem 1rem;
+        padding: 10px 15px;
         border-radius: 8px;
         font-weight: 500;
     }
     
     .status-warning {
-        background: #f59e0b;
+        background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
         color: white;
-        padding: 0.75rem 1rem;
+        padding: 10px 15px;
         border-radius: 8px;
         font-weight: 500;
     }
     
     .status-error {
-        background: #ef4444;
+        background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
         color: white;
-        padding: 0.75rem 1rem;
+        padding: 10px 15px;
         border-radius: 8px;
         font-weight: 500;
     }
     
-    /* Example buttons */
-    .example-btn {
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin: 0.25rem;
-        font-size: 0.875rem;
-        text-align: left;
-    }
-    
-    .example-btn:hover {
-        background: #e2e8f0;
-        border-color: #3b82f6;
-        color: #1e40af;
-    }
-    
-    /* Custom prompt examples */
-    .prompt-example {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .prompt-example:hover {
-        background: #e2e8f0;
-        border-color: #3b82f6;
-    }
-    
-    .prompt-example-title {
-        font-weight: 600;
-        color: #1e40af;
-        margin-bottom: 0.5rem;
-    }
-    
-    .prompt-example-text {
-        font-size: 0.875rem;
-        color: #64748b;
-        line-height: 1.4;
-    }
-    
-    /* Response card */
-    .response-card {
+    .results-section {
         background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        padding: 30px;
+        margin: 30px 0;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
     
-    .response-header {
-        background: #f8fafc;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .query-section h3 {
-        color: #1e293b;
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    .query-text {
-        background: #e2e8f0;
-        padding: 1rem;
+    .tool-info {
+        background: #f7fafc;
+        border-left: 4px solid #4299e1;
+        padding: 15px;
         border-radius: 8px;
-        font-style: italic;
-        color: #475569;
+        margin: 15px 0;
     }
     
-    .meta-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 1rem;
-        font-size: 0.875rem;
-        color: #64748b;
-    }
-    
-    .timestamp, .response-time {
-        background: #f1f5f9;
-        padding: 0.5rem 0.75rem;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-    
-    .response-content {
-        padding: 1.5rem;
-    }
-    
-    .response-content h3 {
-        color: #1e293b;
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-    
-    .response-text {
-        color: #374151;
-        line-height: 1.7;
-        font-size: 0.95rem;
-    }
-    
-    .response-text strong {
-        color: #1e293b;
-        font-weight: 600;
-    }
-    
-    .response-text em {
-        color: #6366f1;
-        font-style: italic;
-    }
-    
-    /* Tool info card */
-    .tool-info-card {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-    }
-    
-    .tool-info-header {
-        background: #f0f9ff;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    
-    .tool-info-header .icon {
-        font-size: 1.5rem;
-    }
-    
-    .tool-info-header h3 {
-        color: #1e40af;
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin: 0;
-    }
-    
-    .tool-info-content {
-        padding: 1.5rem;
-    }
-    
-    .tool-item {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .tool-item:last-child {
-        margin-bottom: 0;
-    }
-    
-    .tool-name {
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 0.5rem;
-    }
-    
-    .tool-param {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin-left: 1rem;
-    }
-    
-    /* Accordion styles */
-    .accordion-header {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 1rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-bottom: 0.5rem;
-    }
-    
-    .accordion-header:hover {
-        background: #e2e8f0;
-    }
-    
-    .accordion-content {
-        padding: 1rem;
-        border: 1px solid #e2e8f0;
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        background: white;
-    }
-    
-    /* Performance badge */
     .performance-badge {
-        background: #10b981;
+        background: linear-gradient(135deg, #38b2ac 0%, #319795 100%);
         color: white;
-        padding: 0.5rem 1rem;
+        padding: 8px 15px;
         border-radius: 20px;
-        font-size: 0.875rem;
         font-weight: 500;
         display: inline-block;
+        margin: 10px 0;
     }
     
-    /* Buttons */
-    .btn-primary {
-        background: #3b82f6;
+    .footer-section {
+        background: #2d3748;
         color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-primary:hover {
-        background: #2563eb;
-    }
-    
-    .btn-secondary {
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-secondary:hover {
-        background: #e2e8f0;
-        border-color: #3b82f6;
-    }
-    
-    /* Footer */
-    .footer {
-        background: #1e293b;
-        color: white;
-        padding: 2rem;
-        border-radius: 12px;
-        margin-top: 2rem;
+        padding: 30px;
+        border-radius: 15px;
+        margin-top: 30px;
         text-align: center;
     }
     
-    .footer h3 {
-        color: white;
-        margin-bottom: 1rem;
-    }
-    
-    .footer a {
-        color: #60a5fa;
+    .footer-section a {
+        color: #63b3ed;
         text-decoration: none;
         font-weight: 500;
     }
     
-    .footer a:hover {
-        color: #93c5fd;
+    .footer-section a:hover {
+        color: #90cdf4;
         text-decoration: underline;
     }
     
-    .footer ul {
-        list-style: none;
-        padding: 0;
-        margin: 1rem 0;
+    .prompt-example {
+        background: #ebf8ff;
+        border: 1px solid #bee3f8;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 8px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
     }
     
-    .footer ul li {
-        margin: 0.5rem 0;
+    .prompt-example:hover {
+        background: #bee3f8;
+        transform: translateX(5px);
     }
     
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .gradio-container {
-            padding: 1rem;
-        }
-        
-        .app-header h1 {
-            font-size: 2rem;
-        }
-        
-        .card {
-            padding: 1rem;
-        }
-        
-        .meta-info {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+    .prompt-example-title {
+        font-weight: 600;
+        color: #2b6cb0;
+        margin-bottom: 5px;
     }
+    
+    .prompt-example-text {
+        font-size: 0.9rem;
+        color: #4a5568;
+        line-height: 1.4;
+    }
+    </style>
     """
     
     def validate_api_key(api_key):
@@ -679,8 +383,9 @@ def create_interface():
             query.strip(), model, temperature, system_prompt.strip() if system_prompt else None
         )
         
-        # Format response with HTML
-        formatted_response = fact_checker.format_response(response, query, response_time)
+        # Format response with timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        formatted_response = f"**Query:** {query}\n\n**Response:**\n{response}\n\n---\n*Generated at {timestamp} in {response_time}s*"
         
         return formatted_response, tool_info or "", f"⚡ Response time: {response_time}s"
     
@@ -694,11 +399,11 @@ def create_interface():
         return prompt_text
     
     # Create the Gradio interface
-    with gr.Blocks(title="Real-time Fact Checker & News Agent", css=custom_css, theme=gr.themes.Ocean()) as demo:
+    with gr.Blocks(title="Real-time Fact Checker & News Agent", css=custom_css) as demo:
         
         # Header
         gr.HTML("""
-        <div class="app-header">
+        <div class="main-header">
             <h1>🔍 Real-time Fact Checker & News Agent</h1>
             <p>Powered by Groq's Compound Models with Built-in Web Search</p>
         </div>
@@ -707,160 +412,168 @@ def create_interface():
         with gr.Row():
             with gr.Column(scale=2):
                 # API Key section
-                gr.HTML('<div class="card">')
-                gr.HTML('<h3>🔑 API Configuration</h3>')
-                api_key_input = gr.Textbox(
-                    label="Groq API Key",
-                    placeholder="Enter your Groq API key here...",
-                    type="password",
-                    info="Get your free API key from https://console.groq.com/"
-                )
-                api_status = gr.Textbox(
-                    label="Status",
-                    value="⚠️ Please enter your API key",
-                    interactive=False
-                )
-                validate_btn = gr.Button("Validate API Key", variant="secondary")
-                gr.HTML('</div>')
+                with gr.Group():
+                    gr.HTML('<div class="feature-card">')
+                    gr.Markdown("### 🔑 API Configuration")
+                    api_key_input = gr.Textbox(
+                        label="Groq API Key",
+                        placeholder="Enter your Groq API key here...",
+                        type="password",
+                        info="Get your free API key from https://console.groq.com/"
+                    )
+                    api_status = gr.Textbox(
+                        label="Status",
+                        value="⚠️ Please enter your API key",
+                        interactive=False
+                    )
+                    validate_btn = gr.Button("Validate API Key", variant="secondary")
+                    gr.HTML('</div>')
                 
                 # Advanced options
-                gr.HTML('<div class="card">')
-                gr.HTML('<h3>⚙️ Advanced Options</h3>')
-                
-                # Custom System Prompt Examples
-                with gr.Accordion("📝 System Prompt Examples", open=False):
-                    gr.Markdown("**Click any example to load it as your system prompt:**")
+                with gr.Group():
+                    gr.HTML('<div class="feature-card">')
+                    gr.Markdown("### ⚙️ Advanced Options")
                     
-                    custom_prompts = fact_checker.get_custom_prompt_examples()
-                    for title, prompt in custom_prompts.items():
-                        with gr.Row():
+                    # Custom System Prompt Examples
+                    with gr.Accordion("📝 System Prompt Examples (Click to view)", open=False):
+                        gr.Markdown("**Click any example to load it as your system prompt:**")
+                        
+                        custom_prompts = fact_checker.get_custom_prompt_examples()
+                        for title, prompt in custom_prompts.items():
+                            with gr.Row():
+                                gr.HTML(f"""
+                                <div class="prompt-example" onclick="document.getElementById('system_prompt_input').value = '{prompt}'">
+                                    <div class="prompt-example-title">{title}</div>
+                                    <div class="prompt-example-text">{prompt[:100]}...</div>
+                                </div>
+                                """)
+                    
+                    with gr.Accordion("🔧 System Prompt (Click to customize)", open=False):
+                        system_prompt_input = gr.Textbox(
+                            label="System Prompt",
+                            value=fact_checker.get_system_prompt(),
+                            lines=8,
+                            info="Customize how the AI behaves and responds",
+                            elem_id="system_prompt_input"
+                        )
+                        reset_prompt_btn = gr.Button("Reset to Default", variant="secondary", size="sm")
+                        
+                        # Add buttons for each custom prompt
+                        gr.Markdown("**Quick Load Custom Prompts:**")
+                        custom_prompts = fact_checker.get_custom_prompt_examples()
+                        for title, prompt in custom_prompts.items():
                             prompt_btn = gr.Button(title, variant="secondary", size="sm")
                             prompt_btn.click(
                                 fn=lambda p=prompt: p,
-                                outputs=[gr.Textbox(elem_id="system_prompt_input")]
+                                outputs=[system_prompt_input]
                             )
-                
-                with gr.Accordion("🔧 System Prompt Customization", open=False):
-                    system_prompt_input = gr.Textbox(
-                        label="System Prompt",
-                        value=fact_checker.get_system_prompt(),
-                        lines=8,
-                        info="Customize how the AI behaves and responds",
-                        elem_id="system_prompt_input"
-                    )
-                    reset_prompt_btn = gr.Button("Reset to Default", variant="secondary", size="sm")
                     
-                    # Add buttons for each custom prompt
-                    gr.Markdown("**Quick Load Custom Prompts:**")
-                    custom_prompts = fact_checker.get_custom_prompt_examples()
-                    for title, prompt in custom_prompts.items():
-                        prompt_btn = gr.Button(title, variant="secondary", size="sm")
-                        prompt_btn.click(
-                            fn=lambda p=prompt: p,
-                            outputs=[system_prompt_input]
-                        )
-                
-                gr.HTML('</div>')
+                    gr.HTML('</div>')
 
                 # Query section
-                gr.HTML('<div class="card">')
-                gr.HTML('<h3>💭 Your Query</h3>')
-                query_input = gr.Textbox(
-                    label="Ask anything that requires real-time information",
-                    placeholder="e.g., What are the latest AI developments today?",
-                    lines=4
-                )
-                
-                with gr.Row():
-                    model_choice = gr.Dropdown(
-                        choices=fact_checker.model_options,
-                        value="compound-beta",
-                        label="Model",
-                        info="compound-beta: More capable | compound-beta-mini: Faster"
+                with gr.Group():
+                    gr.HTML('<div class="feature-card">')
+                    gr.Markdown("### 💭 Your Query")
+                    query_input = gr.Textbox(
+                        label="Ask anything that requires real-time information",
+                        placeholder="e.g., What are the latest AI developments today?",
+                        lines=4
                     )
-                    temperature = gr.Slider(
-                        minimum=0.0,
-                        maximum=1.0,
-                        value=0.7,
-                        step=0.1,
-                        label="Temperature",
-                        info="Higher = more creative, Lower = more focused"
-                    )
-                
-                submit_btn = gr.Button("🔍 Get Real-time Information", variant="primary", size="lg")
-                clear_btn = gr.Button("Clear", variant="secondary")
-                gr.HTML('</div>')
+                    
+                    with gr.Row():
+                        model_choice = gr.Dropdown(
+                            choices=fact_checker.model_options,
+                            value="compound-beta",
+                            label="Model",
+                            info="compound-beta: More capable | compound-beta-mini: Faster"
+                        )
+                        temperature = gr.Slider(
+                            minimum=0.0,
+                            maximum=1.0,
+                            value=0.7,
+                            step=0.1,
+                            label="Temperature",
+                            info="Higher = more creative, Lower = more focused"
+                        )
+                    
+                    submit_btn = gr.Button("🔍 Get Real-time Information", variant="primary", size="lg")
+                    clear_btn = gr.Button("Clear", variant="secondary")
+                    gr.HTML('</div>')
             
             with gr.Column(scale=1):
-                # Example queries
-                gr.HTML('<div class="card">')
-                gr.HTML('<h3>📝 Example Queries</h3>')
-                gr.Markdown("Click any example to load it:")
-                
-                examples = fact_checker.get_example_queries()
-                
-                with gr.Accordion("📰 Latest News", open=True):
-                    for query in examples["📰 Latest News"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                with gr.Accordion("💰 Financial Data", open=False):
-                    for query in examples["💰 Financial Data"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                with gr.Accordion("🌤️ Weather Updates", open=False):
-                    for query in examples["🌤️ Weather Updates"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                with gr.Accordion("🔬 Science & Technology", open=False):
-                    for query in examples["🔬 Science & Technology"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                with gr.Accordion("🏆 Sports & Entertainment", open=False):
-                    for query in examples["🏆 Sports & Entertainment"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                with gr.Accordion("🔍 Fact Checking", open=False):
-                    for query in examples["🔍 Fact Checking"]:
-                        example_btn = gr.Button(query, variant="secondary", size="sm")
-                        example_btn.click(
-                            fn=lambda q=query: q,
-                            outputs=[query_input]
-                        )
-                
-                gr.HTML('</div>')
+                # Example queries with tabs
+                with gr.Group():
+                    gr.HTML('<div class="feature-card">')
+                    gr.Markdown("### 📝 Example Queries")
+                    gr.Markdown("Click any example to load it:")
+                    
+                    examples = fact_checker.get_example_queries()
+                    
+                    with gr.Accordion("📰 Latest News", open=True):
+                        for query in examples["📰 Latest News"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    with gr.Accordion("💰 Financial Data", open=False):
+                        for query in examples["💰 Financial Data"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    with gr.Accordion("🌤️ Weather Updates", open=False):
+                        for query in examples["🌤️ Weather Updates"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    with gr.Accordion("🔬 Science & Technology", open=False):
+                        for query in examples["🔬 Science & Technology"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    with gr.Accordion("🏆 Sports & Entertainment", open=False):
+                        for query in examples["🏆 Sports & Entertainment"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    with gr.Accordion("🔍 Fact Checking", open=False):
+                        for query in examples["🔍 Fact Checking"]:
+                            example_btn = gr.Button(query, variant="secondary", size="sm")
+                            example_btn.click(
+                                fn=lambda q=query: q,
+                                outputs=[query_input]
+                            )
+                    
+                    gr.HTML('</div>')
         
         # Results section
-        gr.HTML('<h3 style="margin: 2rem 0 1rem 0; color: #1e293b; font-size: 1.5rem;">📊 Results</h3>')
+        gr.HTML('<div class="results-section">')
+        gr.Markdown("### 📊 Results")
         
         with gr.Row():
             with gr.Column(scale=2):
-                response_output = gr.HTML(
-                    value="<div style='padding: 2rem; text-align: center; color: #64748b; font-style: italic;'>Your response will appear here...</div>"
+                response_output = gr.Markdown(
+                    label="Response",
+                    value="*Your response will appear here...*"
                 )
             
             with gr.Column(scale=1):
-                tool_info_output = gr.HTML(
-                    value="<div style='padding: 2rem; text-align: center; color: #64748b; font-style: italic;'>Tool execution details will appear here...</div>"
+                tool_info_output = gr.Markdown(
+                    label="Tool Execution Info",
+                    value="*Tool execution details will appear here...*"
                 )
                 
                 performance_output = gr.Textbox(
@@ -868,6 +581,7 @@ def create_interface():
                     value="",
                     interactive=False
                 )
+        gr.HTML('</div>')
         
         # Event handlers
         validate_btn.click(
@@ -888,13 +602,13 @@ def create_interface():
         )
         
         clear_btn.click(
-            fn=lambda: ("", "<div style='padding: 2rem; text-align: center; color: #64748b; font-style: italic;'>Your response will appear here...</div>", "<div style='padding: 2rem; text-align: center; color: #64748b; font-style: italic;'>Tool execution details will appear here...</div>", ""),
+            fn=lambda: ("", "*Your response will appear here...*", "*Tool execution details will appear here...*", ""),
             outputs=[query_input, response_output, tool_info_output, performance_output]
         )
         
         # Footer
         gr.HTML("""
-        <div class="footer">
+        <div class="footer-section">
             <h3>🔗 Useful Links</h3>
             <p>
                 <a href="https://console.groq.com/" target="_blank">Groq Console</a> - Get your free API key<br>
@@ -903,7 +617,7 @@ def create_interface():
             </p>
             
             <h3>💡 Tips</h3>
-            <ul>
+            <ul style="text-align: left; display: inline-block;">
                 <li>The compound models automatically use web search when real-time information is needed</li>
                 <li>Try different temperature settings: 0.1 for factual queries, 0.7-0.9 for creative questions</li>
                 <li>compound-beta is more capable but slower, compound-beta-mini is faster but less capable</li>
