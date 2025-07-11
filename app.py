@@ -694,7 +694,7 @@ def create_interface():
         return prompt_text
     
     # Create the Gradio interface
-    with gr.Blocks(title="Real-time Fact Checker & News Agent", css=custom_css) as demo:
+    with gr.Blocks(title="Real-time Fact Checker & News Agent", css=custom_css, theme=gr.themes.Ocean()) as demo:
         
         # Header
         gr.HTML("""
