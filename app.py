@@ -413,7 +413,7 @@ def create_interface():
             with gr.Column(scale=2):
                 # API Key section
                 with gr.Group():
-                    gr.HTML('<div class="feature-card">')
+                    gr.HTML('<div class="feature-card">API Key Section</div>')
                     gr.Markdown("### 🔑 API Configuration")
                     api_key_input = gr.Textbox(
                         label="Groq API Key",
@@ -431,7 +431,7 @@ def create_interface():
                 
                 # Advanced options
                 with gr.Group():
-                    gr.HTML('<div class="feature-card">')
+                    gr.HTML('<div class="feature-card">⚙️ Advanced Options</div>')
                     gr.Markdown("### ⚙️ Advanced Options")
                     
                     # Custom System Prompt Examples
@@ -472,7 +472,7 @@ def create_interface():
 
                 # Query section
                 with gr.Group():
-                    gr.HTML('<div class="feature-card">')
+                    gr.HTML('<div class="feature-card">Query section</div>')
                     gr.Markdown("### 💭 Your Query")
                     query_input = gr.Textbox(
                         label="Ask anything that requires real-time information",
@@ -503,7 +503,7 @@ def create_interface():
             with gr.Column(scale=1):
                 # Example queries with tabs
                 with gr.Group():
-                    gr.HTML('<div class="feature-card">')
+                    gr.HTML('<div class="feature-card">Example queries with tabs</div>')
                     gr.Markdown("### 📝 Example Queries")
                     gr.Markdown("Click any example to load it:")
                     
