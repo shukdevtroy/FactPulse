@@ -14,9 +14,9 @@ class RealTimeFactChecker:
         """Initialize Groq client with API key"""
         try:
             self.client = Groq(api_key=api_key)
-            return True, '<div class="status-success">✅ API Key validated successfully!</div>'
+            return True, "<div class='status success'>✅ API Key validated successfully!</div>"
         except Exception as e:
-            return False, f'<div class="status-error">❌ Error initializing client: {str(e)}</div>'
+            return False, f"<div class='status error'>❌ Error initializing client: {str(e)}</div>"
     
     def get_system_prompt(self):
         """Get the system prompt for consistent behavior"""
@@ -38,7 +38,7 @@ WHEN TO SEARCH:
 - Weather conditions or forecasts
 - Recent scientific discoveries or research
 - Current political developments
-- Real-time statistics or data
+- Real-time statics or data
 - Verification of recent claims or rumors
 RESPONSE FORMAT:
 - Lead with key facts
@@ -51,7 +51,7 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
     def query_compound_model(self, query, model, temperature=0.7, custom_system_prompt=None):
         """Query the compound model and return response with tool execution info"""
         if not self.client:
-            return '<div class="status-error">❌ Please set a valid API key first.</div>', None, None
+            return "<div class='status error'>❌ Please set a valid API key first.</div>", None, None
         
         try:
             start_time = time.time()
@@ -86,14 +86,14 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
             return response_content, tool_info, response_time
             
         except Exception as e:
-            return f'<div class="status-error">❌ Error querying model: {str(e)}</div>', None, None
+            return f"<div class='status error'>❌ Error querying model: {str(e)}</div>", None, None
     
     def format_tool_info(self, executed_tools):
         """Format executed tools information for display"""
         if not executed_tools:
-            return '<div class="tool-info"><strong>🔍 Tools Used:</strong> None (Used existing knowledge)</div>'
+            return "<div class='tool-info'><strong>Tools Used:</strong> None (Used existing knowledge)</div>"
         
-        tool_info = '<div class="tool-info"><strong>🔍 Tools Used:</strong><ul>'
+        tool_info = "<div class='tool-info'><strong>Tools Used:</strong><ul>"
         for i, tool in enumerate(executed_tools, 1):
             try:
                 if hasattr(tool, 'name'):
@@ -105,64 +105,64 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
                 else:
                     tool_name = str(tool)
                 
-                tool_info += f'<li>{i}. <strong>{tool_name}</strong>'
+                tool_info += f"<li>{i}. <strong>{tool_name}</strong>"
                 
                 if hasattr(tool, 'parameters'):
                     params = tool.parameters
                     if isinstance(params, dict):
-                        tool_info += '<ul>'
+                        tool_info += "<ul>"
                         for key, value in params.items():
-                            tool_info += f'<li>{key}: {value}</li>'
-                        tool_info += '</ul>'
+                            tool_info += f"<li>{key}: {value}</li>"
+                        tool_info += "</ul>"
                 elif hasattr(tool, 'input'):
-                    tool_info += f'<ul><li>Input: {tool.input}</li></ul>'
-                tool_info += '</li>'
-                
-            except Exception:
-                tool_info += f'<li>{i}. <strong>Tool {i}</strong> (Error parsing details)</li>'
+                    tool_info += f"<ul><li>Input: {tool.input}</li></ul>"
+                tool_info += "</li>"
+                    
+            except Exception as e:
+                tool_info += f"<li>{i}. <strong>Tool {i}</strong> (Error parsing details)</li>"
         
-        tool_info += '</ul></div>'
+        tool_info += "</ul></div>"
         return tool_info
     
     def get_example_queries(self):
         """Return categorized example queries"""
         return {
-            "📰 Latest News": [
+            "Latest News": [
                 "What are the top 3 news stories today?",
                 "Latest developments in AI technology this week",
                 "Recent political events in the United States",
                 "Breaking news about climate change",
                 "What happened in the stock market today?"
             ],
-            "💰 Financial Data": [
+            "Financial Data": [
                 "Current price of Bitcoin",
                 "Tesla stock price today",
                 "How is the S&P 500 performing today?",
                 "Latest cryptocurrency market trends",
                 "What's the current inflation rate?"
             ],
-            "🌤️ Weather Updates": [
+            "Weather Updates": [
                 "Current weather in New York City",
                 "Weather forecast for London this week",
                 "Is it going to rain in San Francisco today?",
                 "Temperature in Tokyo right now",
                 "Weather conditions in Sydney"
             ],
-            "🔬 Science & Technology": [
+            "Science & Technology": [
                 "Latest breakthroughs in fusion energy",
                 "Recent discoveries in space exploration",
                 "New developments in quantum computing",
                 "Latest medical research findings",
                 "Recent advances in renewable energy"
             ],
-            "🏆 Sports & Entertainment": [
+            "Sports & Entertainment": [
                 "Latest football match results",
                 "Who won the recent tennis tournament?",
                 "Box office numbers for this weekend",
                 "Latest movie releases this month",
                 "Recent celebrity news"
             ],
-            "🔍 Fact Checking": [
+            "Fact Checking": [
                 "Is it true that the Earth's population reached 8 billion?",
                 "Verify: Did company X announce layoffs recently?",
                 "Check if the recent earthquake in Turkey was magnitude 7+",
@@ -174,12 +174,12 @@ Remember: Your goal is to be the most reliable, up-to-date source of information
     def get_custom_prompt_examples(self):
         """Return custom system prompt examples"""
         return {
-            "🎯 Fact-Checker": "You are a fact-checker. Always verify claims with multiple sources and clearly indicate confidence levels in your assessments. Use phrases like 'highly confident', 'moderately confident', or 'requires verification' when presenting information.",
-            "📊 News Analyst": "You are a news analyst. Focus on providing balanced, unbiased reporting with multiple perspectives on current events. Always present different viewpoints and avoid partisan language.",
-            "💼 Financial Advisor": "You are a financial advisor. Provide accurate market data with context about trends and implications for investors. Always include disclaimers about market risks and the importance of professional financial advice.",
-            "🔬 Research Assistant": "You are a research assistant specializing in scientific and technical information. Provide detailed, evidence-based responses with proper context about methodology and limitations of studies.",
-            "🌍 Global News Correspondent": "You are a global news correspondent. Focus on international events and their interconnections. Provide cultural context and explain how events in one region might affect others.",
-            "📈 Market Analyst": "You are a market analyst. Provide detailed financial analysis including technical indicators, market sentiment, and economic factors affecting price movements."
+            "Fact-Checker": "You are a fact-checker. Always verify claims with multiple sources and clearly indicate confidence levels in your assessments. Use phrases like 'highly confident', 'moderately confident', or 'requires verification' when presenting information.",
+            "News Analyst": "You are a news analyst. Focus on providing balanced, unbiased reporting with multiple perspectives on current events. Always present different viewpoints and avoid partisan language.",
+            "Financial Advisor": "You are a financial advisor. Provide accurate market data with context about trends and implications for investors. Always include disclaimers about market risks and the importance of professional financial advice.",
+            "Research Assistant": "You are a research assistant specializing in scientific and technical information. Provide detailed, evidence-based responses with proper context about methodology and limitations of studies.",
+            "Global News Correspondent": "You are a global news correspondent. Focus on international events and their interconnections. Provide cultural context and explain how events in one region might affect others.",
+            "Market Analyst": "You are a market analyst. Provide detailed financial analysis including technical indicators, market sentiment, and economic factors affecting price movements."
         }
 
 def create_interface():
@@ -188,206 +188,200 @@ def create_interface():
     custom_css = """
     <style>
     .gradio-container {
-        max-width: 1400px;
+        max-width: 1200px;
         margin: 0 auto;
         background: #f5f7fa;
-        min-height: 100vh;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        color: #1f2937;
+        padding: 20px;
     }
     
-    .main-header {
-        background: white;
+    .header {
+        background: #ffffff;
         padding: 2rem;
         border-radius: 12px;
-        margin: 2rem 1rem;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
     }
     
-    .main-header h1 {
+    .header h1 {
         font-size: 2rem;
-        font-weight: 700;
+        color: #1a202c;
         margin: 0;
-        color: #111827;
     }
     
-    .main-header p {
+    .header p {
         font-size: 1rem;
-        color: #4b5563;
+        color: #4a5568;
         margin: 0.5rem 0 0;
     }
     
-    .section-card {
-        background: white;
+    .card {
+        background: #ffffff;
         border-radius: 12px;
         padding: 1.5rem;
-        margin: 1rem;
+        margin-bottom: 1.5rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: box-shadow 0.2s ease;
+        border: 1px solid #e2e8f0;
     }
     
-    .section-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    .card h3 {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin: 0 0 1rem;
+    }
+    
+    .status.success {
+        background: #e6fffa;
+        color: #2b6cb0;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border-left: 4px solid #2b6cb0;
+    }
+    
+    .status.error {
+        background: #fff5f5;
+        color: #c53030;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border-left: 4px solid #c53030;
+    }
+    
+    .tool-info {
+        background: #edf2f7;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        color: #2d3748;
+    }
+    
+    .tool-info ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .result-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .result-card h3 {
+        font-size: 1.25rem;
+        color: #2d3748;
+        margin: 0 0 1rem;
+    }
+    
+    .result-content {
+        color: #4a5568;
+        line-height: 1.6;
+    }
+    
+    .performance {
+        font-size: 0.9rem;
+        color: #2b6cb0;
+        margin-top: 1rem;
+        font-style: italic;
     }
     
     .example-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1rem;
         margin-top: 1rem;
     }
     
     .example-item {
-        background: #f8fafc;
-        border-radius: 8px;
+        background: #edf2f7;
         padding: 1rem;
+        border-radius: 8px;
         cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid #e5e7eb;
+        transition: background 0.2s;
     }
     
     .example-item:hover {
-        background: #e5e7eb;
-        transform: translateY(-2px);
+        background: #e2e8f0;
     }
     
-    .status-success {
-        background: #ecfdf5;
-        color: #065f46;
-        padding: 0.75rem;
-        border-radius: 8px;
-        border: 1px solid #d1fae5;
-    }
-    
-    .status-error {
-        background: #fef2f2;
-        color: #991b1b;
-        padding: 0.75rem;
-        border-radius: 8px;
-        border: 1px solid #fee2e2;
-    }
-    
-    .results-section {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    
-    .tool-info {
-        background: #f8fafc;
-        border-radius: 8px;
+    .prompt-example {
+        background: #e6fffa;
         padding: 1rem;
-        margin: 1rem 0;
-        border: 1px solid #e5e7eb;
-    }
-    
-    .performance-badge {
-        background: #e5e7eb;
-        color: #374151;
-        padding: 0.5rem 1rem;
-        border-radius: 9999px;
-        display: inline-block;
+        border-radius: 8px;
         margin: 0.5rem 0;
-        font-size: 0.875rem;
+        cursor: pointer;
+        transition: background 0.2s;
     }
     
-    .footer-section {
-        background: #111827;
-        color: white;
+    .prompt-example:hover {
+        background: #b2f5ea;
+    }
+    
+    .prompt-title {
+        font-weight: 600;
+        color: #2b6cb0;
+        margin-bottom: 0.25rem;
+    }
+    
+    .prompt-text {
+        font-size: 0.9rem;
+        color: #4a5568;
+    }
+    
+    .footer {
+        background: #2d3748;
+        color: #e2e8f0;
         padding: 2rem;
         border-radius: 12px;
-        margin: 2rem 1rem;
         text-align: center;
+        margin-top: 2rem;
     }
     
-    .footer-section a {
-        color: #60a5fa;
+    .footer a {
+        color: #63b3ed;
         text-decoration: none;
         font-weight: 500;
     }
     
-    .footer-section a:hover {
+    .footer a:hover {
+        color: #90cdf4;
         text-decoration: underline;
     }
     
-    .prompt-example {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid #e5e7eb;
-    }
-    
-    .prompt-example:hover {
-        background: #e5e7eb;
-    }
-    
-    .prompt-example-title {
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.25rem;
-    }
-    
-    .prompt-example-text {
-        font-size: 0.875rem;
-        color: #4b5563;
-        line-height: 1.5;
-    }
-    
-    .gr-button {
-        border-radius: 8px !important;
-        padding: 0.75rem 1.5rem !important;
-        font-weight: 500 !important;
-    }
-    
     .gr-button-primary {
-        background: #2563eb !important;
-        color: white !important;
-    }
-    
-    .gr-button-primary:hover {
-        background: #1d4ed8 !important;
+        background: #2b6cb0;
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
     }
     
     .gr-button-secondary {
-        background: #e5e7eb !important;
-        color: #374151 !important;
-    }
-    
-    .gr-button-secondary:hover {
-        background: #d1d5db !important;
-    }
-    
-    .gr-textbox, .gr-dropdown, .gr-slider {
-        border-radius: 8px !important;
-        border: 1px solid #e5e7eb !important;
-    }
-    
-    .gr-accordion {
-        border-radius: 8px !important;
-        border: 1px solid #e5e7eb !important;
+        background: #e2e8f0;
+        color: #2d3748;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
     }
     </style>
     """
     
     def validate_api_key(api_key):
         if not api_key or api_key.strip() == "":
-            return '<div class="status-error">❌ Please enter a valid API key</div>', False
+            return "<div class='status error'>❌ Please enter a valid API key</div>", False
         
         success, message = fact_checker.initialize_client(api_key.strip())
         return message, success
     
     def process_query(query, model, temperature, api_key, system_prompt):
         if not api_key or api_key.strip() == "":
-            return '<div class="status-error">❌ Please set your API key first</div>', "", ""
+            return "<div class='status error'>❌ Please set your API key first</div>", "", ""
         
         if not query or query.strip() == "":
-            return '<div class="status-error">❌ Please enter a query</div>', "", ""
+            return "<div class='status error'>❌ Please enter a query</div>", "", ""
         
         if not fact_checker.client:
             success, message = fact_checker.initialize_client(api_key.strip())
@@ -400,17 +394,16 @@ def create_interface():
         
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         formatted_response = f"""
-        <div class="results-section">
-            <h3>Query</h3>
+        <div class='result-content'>
+            <h4>Query:</h4>
             <p>{query}</p>
-            <h3>Response</h3>
-            <div>{response}</div>
-            <hr>
-            <p><em>Generated at {timestamp} in {response_time}s</em></p>
+            <h4>Response:</h4>
+            <p>{response}</p>
+            <p class='performance'>Generated at {timestamp} in {response_time}s</p>
         </div>
         """
         
-        return formatted_response, tool_info or "", f'<div class="performance-badge">⚡ Response time: {response_time}s</div>'
+        return formatted_response, tool_info or "", f"<div class='performance'>⚡ Response time: {response_time}s</div>"
     
     def reset_system_prompt():
         return fact_checker.get_system_prompt()
@@ -421,74 +414,63 @@ def create_interface():
     def load_custom_prompt(prompt_text):
         return prompt_text
     
-    with gr.Blocks(title="Real-time Fact Checker & News Agent", css=custom_css) as demo:
+    with gr.Blocks(title="Real-time Fact Checker", css=custom_css) as demo:
+        
         gr.HTML("""
-        <div class="main-header">
+        <div class="header">
             <h1>🔍 Real-time Fact Checker</h1>
-            <p>Powered by Groq's Compound Models with Real-time Web Search</p>
+            <p>Instantly verify facts and get the latest news with Groq's Compound Models</p>
         </div>
         """)
         
         with gr.Row():
-            with gr.Column(scale=2):
+            with gr.Column(scale=3):
                 with gr.Group():
-                    gr.HTML('<div class="section-card">')
-                    gr.Markdown("### 🔑 API Configuration")
+                    gr.HTML('<div class="card">')
+                    gr.Markdown("### API Configuration")
                     api_key_input = gr.Textbox(
                         label="Groq API Key",
-                        placeholder="Enter your Groq API key here...",
+                        placeholder="Enter your Groq API key...",
                         type="password",
-                        info="Get your free API key from https://console.groq.com/"
+                        info="Obtain your free API key from https://console.groq.com/"
                     )
                     api_status = gr.HTML(
-                        value='<div class="status-error">⚠️ Please enter your API key</div>'
+                        value="<div class='status error'>⚠️ Please enter your API key</div>"
                     )
                     validate_btn = gr.Button("Validate API Key", variant="secondary")
                     gr.HTML('</div>')
                 
                 with gr.Group():
-                    gr.HTML('<div class="section-card">')
-                    gr.Markdown("### ⚙️ Advanced Options")
-                    
-                    with gr.Accordion("📝 System Prompt Examples", open=False):
-                        gr.Markdown("**Click any example to load it as your system prompt:**")
+                    gr.HTML('<div class="card">')
+                    gr.Markdown("### System Prompt")
+                    with gr.Accordion("Customize System Prompt", open=False):
+                        system_prompt_input = gr.Textbox(
+                            label="System Prompt",
+                            value=fact_checker.get_system_prompt(),
+                            lines=6,
+                            info="Customize the AI's behavior"
+                        )
+                        reset_prompt_btn = gr.Button("Reset to Default", variant="secondary")
+                        
+                        gr.Markdown("#### Prompt Examples")
                         custom_prompts = fact_checker.get_custom_prompt_examples()
                         for title, prompt in custom_prompts.items():
                             gr.HTML(f"""
                             <div class="prompt-example" onclick="document.getElementById('system_prompt_input').value = '{prompt}'">
-                                <div class="prompt-example-title">{title}</div>
-                                <div class="prompt-example-text">{prompt[:100]}...</div>
+                                <div class="prompt-title">{title}</div>
+                                <div class="prompt-text">{prompt[:80]}...</div>
                             </div>
                             """)
-                    
-                    with gr.Accordion("🔧 System Prompt", open=False):
-                        system_prompt_input = gr.Textbox(
-                            label="System Prompt",
-                            value=fact_checker.get_system_prompt(),
-                            lines=8,
-                            info="Customize how the AI behaves and responds",
-                            elem_id="system_prompt_input"
-                        )
-                        reset_prompt_btn = gr.Button("Reset to Default", variant="secondary")
-                        
-                        gr.Markdown("**Quick Load Custom Prompts:**")
-                        for title, prompt in custom_prompts.items():
-                            prompt_btn = gr.Button(title, variant="secondary")
-                            prompt_btn.click(
-                                fn=lambda p=prompt: p,
-                                outputs=[system_prompt_input]
-                            )
                     gr.HTML('</div>')
                 
                 with gr.Group():
-                    gr.HTML('<div class="section-card">')
-                    gr.Markdown("### 💭 Your Query")
+                    gr.HTML('<div class="card">')
+                    gr.Markdown("### Your Query")
                     query_input = gr.Textbox(
-                        label="Ask anything that requires real-time information",
-                        placeholder="e.g., What are the latest AI developments today?",
-                        lines=4
+                        label="Ask a Question",
+                        placeholder="e.g., What's the latest news on AI developments?",
+                        lines=3
                     )
-                    
                     with gr.Row():
                         model_choice = gr.Dropdown(
                             choices=fact_checker.model_options,
@@ -502,46 +484,54 @@ def create_interface():
                             step=0.1,
                             label="Temperature"
                         )
-                    
-                    submit_btn = gr.Button("🔍 Get Real-time Information", variant="primary")
+                    submit_btn = gr.Button("🔍 Get Answer", variant="primary")
                     clear_btn = gr.Button("Clear", variant="secondary")
                     gr.HTML('</div>')
             
-            with gr.Column(scale=1):
+            with gr.Column(scale=2):
                 with gr.Group():
-                    gr.HTML('<div class="section-card">')
-                    gr.Markdown("### 📝 Example Queries")
-                    gr.Markdown("Click any example to load it:")
-                    
+                    gr.HTML('<div class="card">')
+                    gr.Markdown("### Example Queries")
                     examples = fact_checker.get_example_queries()
-                    for category, queries in examples.items():
-                        with gr.Accordion(category, open=category == "📰 Latest News"):
-                            for query in queries:
-                                example_btn = gr.Button(query, variant="secondary")
-                                example_btn.click(
-                                    fn=lambda q=query: q,
-                                    outputs=[query_input]
-                                )
+                    with gr.Tabs():
+                        for category, queries in examples.items():
+                            with gr.Tab(category):
+                                for query in queries:
+                                    gr.HTML(f'<div class="example-item" onclick="document.getElementById(\'query_input\').value = \'{query}\'">{query}</div>')
                     gr.HTML('</div>')
         
-        gr.HTML('<div class="results-section">')
-        gr.Markdown("### 📊 Results")
-        
+        gr.HTML('<div class="result-card">')
+        gr.Markdown("### Results")
         with gr.Row():
-            with gr.Column(scale=2):
+            with gr.Column(scale=3):
                 response_output = gr.HTML(
-                    value='<div class="results-section"><em>Your response will appear here...</em></div>'
+                    value="<div class='result-content'>Enter a query to see results...</div>"
                 )
-            
-            with gr.Column(scale=1):
+            with gr.Column(scale=2):
                 tool_info_output = gr.HTML(
-                    value='<div class="tool-info"><em>Tool execution details will appear here...</em></div>'
+                    value="<div class='tool-info'>Tool execution details will appear here...</div>"
                 )
-                
                 performance_output = gr.HTML(
                     value=""
                 )
         gr.HTML('</div>')
+        
+        gr.HTML("""
+        <div class="footer">
+            <h3>Links</h3>
+            <p>
+                <a href="https://console.groq.com/" target="_blank">Groq Console</a> |
+                <a href="https://console.groq.com/docs/quickstart" target="_blank">Documentation</a> |
+                <a href="https://console.groq.com/docs/models" target="_blank">Models Info</a>
+            </p>
+            <h3>Tips</h3>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Use compound-beta for detailed responses</li>
+                <li>Adjust temperature for creative or factual responses</li>
+                <li>Check tool execution info for source transparency</li>
+            </ul>
+        </div>
+        """)
         
         validate_btn.click(
             fn=validate_api_key,
@@ -561,29 +551,9 @@ def create_interface():
         )
         
         clear_btn.click(
-            fn=lambda: ("", '<div class="results-section"><em>Your response will appear here...</em></div>', 
-                       '<div class="tool-info"><em>Tool execution details will appear here...</em></div>', ""),
+            fn=lambda: ("", "<div class='result-content'>Enter a query to see results...</div>", "<div class='tool-info'>Tool execution details will appear here...</div>", ""),
             outputs=[query_input, response_output, tool_info_output, performance_output]
         )
-        
-        gr.HTML("""
-        <div class="footer-section">
-            <h3>🔗 Useful Links</h3>
-            <p>
-                <a href="https://console.groq.com/" target="_blank">Groq Console</a> - Get your free API key<br>
-                <a href="https://console.groq.com/docs/quickstart" target="_blank">Groq Documentation</a> - Learn more about Groq models<br>
-                <a href="https://console.groq.com/docs/models" target="_blank">Compound Models Info</a> - Details about compound models
-            </p>
-            <h3>💡 Tips</h3>
-            <ul style="text-align: left; display: inline-block;">
-                <li>Compound models use web search for real-time information</li>
-                <li>Use temperature 0.1 for factual queries, 0.7-0.9 for creative ones</li>
-                <li>compound-beta: more capable | compound-beta-mini: faster</li>
-                <li>Customize system prompts for specialized responses</li>
-                <li>Check Tool Execution Info for web search usage</li>
-            </ul>
-        </div>
-        """)
     
     return demo
 
