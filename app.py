@@ -209,7 +209,7 @@ def create_interface():
         return example_text
     
     # Create the Gradio interface
-    with gr.Blocks(title="Real-time Fact Checker & News Agent", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="Real-time Fact Checker & News Agent", theme=gr.themes.Ocean()) as demo:
         gr.Markdown("""
         # 🔍 Real-time Fact Checker & News Agent
         
